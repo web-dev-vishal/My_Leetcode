@@ -1,25 +1,6 @@
 name: leetcode-backend-api
 
 services:
-  db:
-    image: mongo:latest
-    container_name: leetcode-mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-      MONGO_INITDB_DATABASE: leetcode
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - leetcode-network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/leetcode --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7-alpine
     container_name: leetcode-redis
@@ -62,7 +43,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8080
-      MONGODB_URI: mongodb://localhost:27017/leetcode
+      MONGODB_URI: mongodb://host.docker.internal:27017/leetcode
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redispass123
@@ -73,15 +54,12 @@ services:
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
-      OPENROUTER_MODEL: google/gemini-flash-1.5
+      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
       OPENROUTER_TIMEOUT: 30000
       APP_URL: http://localhost:8080
-      CORS_ORIGIN: "*"
     ports:
       - "8080:8080"
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
@@ -95,7 +73,7 @@ services:
     command: node src/workers/index.js
     environment:
       NODE_ENV: production
-      MONGODB_URI: mongodb://localhost:27017/leetcode
+      MONGODB_URI: mongodb://host.docker.internal:27017/leetcode
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redispass123
@@ -105,10 +83,8 @@ services:
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
-      OPENROUTER_MODEL: google/gemini-flash-1.5
+      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
@@ -123,6 +99,5 @@ networks:
   leetcode-network:
 
 volumes:
-  mongodb_data:
   redis_data:
   rabbitmq_data:
