@@ -3,12 +3,14 @@ import { createServer } from "http";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { connectDB } from "./lib/db.js";
 import { redisManager } from "./lib/redis.js";
 import { rabbitMQ } from "./lib/rabbitmq.js";
 import { socketManager } from "./lib/socket.js";
 import { logger } from "./lib/logger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { securityHeaders, requestLogger, sanitizeInput } from "./middlewares/security.middleware.js";
 
 import authRouter from "./routes/auth.routes.js";
 import problemRoutes from "./routes/problem.routes.js"
@@ -17,6 +19,7 @@ import submissionsRoutes from "./routes/submission.routes.js";
 import playListroutes from "./routes/playlist.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 import { rateLimiter } from "./lib/rateLimiter.js";
                                                                                                                                                                                                                                                                                                                                                                                        
 dotenv.config({ path: {debug: true} });
@@ -46,24 +49,38 @@ async function startServer() {
       socketManager.emitToUser(data.userId, 'submission:completed', data);
     });
 
-    app.use(express.json());
+    app.use(cors({
+      origin: process.env.CORS_ORIGIN || '*',
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    }));
+
+    app.use(securityHeaders);
+    app.use(requestLogger);
+    app.use(express.json({ limit: '10mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    app.use(sanitizeInput);
     app.use(morgan("dev"));
-    app.use(cookieParser())
+    app.use(cookieParser());
+
+    app.disable('x-powered-by');
 
     app.get('/', (req, res) => {
         res.json({ 
-            success: true ,
+            success: true,
             message: "Welcome to leetcode api"
         })
-    })
+    });
 
-    app.use("/api/v1/auth" , authRouter);
+    app.use("/api/v1/auth", authRouter);
     app.use('/api/v1/problems', problemRoutes);
     app.use("/api/v1/execute-code", rateLimiter.middleware('codeExecution'), executecodeRoutes);
     app.use("/api/v1/submission", submissionsRoutes);
-    app.use("/api/v1/playlist",playListroutes);
+    app.use("/api/v1/playlist", playListroutes);
     app.use("/api/v1/leaderboard", leaderboardRoutes);
     app.use("/api/v1/health", healthRoutes);
+    app.use("/api/v1/ai", aiRoutes);
 
     app.use(errorHandler);
 

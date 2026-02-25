@@ -71,6 +71,11 @@ services:
       RAPIDAPI_KEY: 8f8c4db865msh020ffd097deb5f0p1d129ajsne4ac3f4df319
       RAPIDAPI_HOST: judge0-ce.p.rapidapi.com
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
+      OPENROUTER_TIMEOUT: 30000
+      APP_URL: http://localhost:8080
     ports:
       - "8080:8080"
     depends_on:
@@ -98,6 +103,9 @@ services:
       RAPIDAPI_KEY: 8f8c4db865msh020ffd097deb5f0p1d129ajsne4ac3f4df319
       RAPIDAPI_HOST: judge0-ce.p.rapidapi.com
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
     depends_on:
       db:
         condition: service_healthy

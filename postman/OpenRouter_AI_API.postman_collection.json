@@ -1,0 +1,323 @@
+{
+  "info": {
+    "name": "LeetCode Clone - OpenRouter AI API",
+    "_postman_id": "openrouter-ai-collection",
+    "description": "Complete API collection for testing OpenRouter AI integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Features",
+      "item": [
+        {
+          "name": "Get Hint (No Code)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/hint/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "hint", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Hint (With Code)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"function twoSum(nums, target) {\\n  // I'm stuck here\\n}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/hint/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "hint", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Explain Problem",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/explain/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "explain", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Analyze Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"function twoSum(nums, target) {\\n  for (let i = 0; i < nums.length; i++) {\\n    for (let j = i + 1; j < nums.length; j++) {\\n      if (nums[i] + nums[j] === target) {\\n        return [i, j];\\n      }\\n    }\\n  }\\n  return [];\\n}\",\n  \"language\": \"javascript\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/analyze/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "analyze", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Suggest Optimization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"function twoSum(nums, target) {\\n  for (let i = 0; i < nums.length; i++) {\\n    for (let j = i + 1; j < nums.length; j++) {\\n      if (nums[i] + nums[j] === target) {\\n        return [i, j];\\n      }\\n    }\\n  }\\n  return [];\\n}\",\n  \"language\": \"javascript\",\n  \"currentComplexity\": \"O(n^2)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/optimize",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "optimize"]
+            }
+          }
+        },
+        {
+          "name": "Generate Test Cases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/testcases/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "testcases", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Explain Solution",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"solution\": \"function twoSum(nums, target) {\\n  const map = new Map();\\n  for (let i = 0; i < nums.length; i++) {\\n    const complement = target - nums[i];\\n    if (map.has(complement)) {\\n      return [map.get(complement), i];\\n    }\\n    map.set(nums[i], i);\\n  }\\n  return [];\\n}\",\n  \"language\": \"javascript\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/explain-solution/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "explain-solution", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Debug Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"function twoSum(nums, target) {\\n  return nums[0] + nums[1];\\n}\",\n  \"language\": \"javascript\",\n  \"error\": \"Expected [0,1] but got 3\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/debug",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "debug"]
+            }
+          }
+        },
+        {
+          "name": "Compare Approaches",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approach1\": \"Brute force with nested loops - O(n^2) time, O(1) space\",\n  \"approach2\": \"Hash map approach - O(n) time, O(n) space\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/compare/{{problemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "compare", "{{problemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Usage Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/usage?days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "ai", "usage"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Basic Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health"]
+            }
+          }
+        },
+        {
+          "name": "Detailed Health (with AI status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health/detailed",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health", "detailed"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "problemId",
+      "value": "your_problem_id_here",
+      "type": "string"
+    }
+  ]
+}

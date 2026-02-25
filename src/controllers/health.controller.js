@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { redisManager } from '../lib/redis.js';
 import { rabbitMQ } from '../lib/rabbitmq.js';
 import { analyticsService } from '../services/analyticsService.js';
+import { aiService } from '../services/aiService.js';
 import { logger } from '../lib/logger.js';
 
 export const healthCheck = async (req, res) => {
@@ -38,9 +39,10 @@ export const healthCheck = async (req, res) => {
 
 export const detailedHealth = async (req, res) => {
   try {
-    const [systemStats, queueStats] = await Promise.all([
+    const [systemStats, queueStats, aiHealth] = await Promise.all([
       analyticsService.getSystemStats(),
       rabbitMQ.getQueueStats('code_execution'),
+      aiService.checkHealth(),
     ]);
 
     res.status(200).json({
@@ -54,7 +56,9 @@ export const detailedHealth = async (req, res) => {
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
         redis: redisManager.isConnected ? 'connected' : 'disconnected',
         rabbitmq: rabbitMQ.isConnected ? 'connected' : 'disconnected',
+        openrouter: aiHealth.status,
       },
+      ai: aiHealth,
     });
   } catch (error) {
     logger.error('Error getting detailed health:', error);
