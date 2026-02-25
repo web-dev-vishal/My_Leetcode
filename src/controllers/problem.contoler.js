@@ -1,11 +1,11 @@
-// Import Mongoose models
 import { Problem, ProblemSolved } from "../models/index.js";
-// Import Judge0 helper functions for code execution and validation
 import {
   getJudge0LanguageId,
   pollBatchResults,
   submitBatch,
 } from "../lib/judge0.js";
+import { cacheService } from "../lib/cache.js";
+import { logger } from "../lib/logger.js";
 
 // Function to create a new coding problem
 export const createProblem = async (req, res) => {
@@ -102,71 +102,90 @@ export const createProblem = async (req, res) => {
 };
 
 
-// Function to get all problems from database
 export const getAllProblems = async (req, res) => {
   try {
-    // Get all problems and check if solved by current user
+    const cached = await cacheService.getCachedProblems();
+    if (cached) {
+      const solvedProblems = await ProblemSolved.find({ userId: req.user.id }).lean();
+      const solvedProblemIds = new Set(solvedProblems.map(sp => sp.problemId.toString()));
+      
+      const problemsWithSolvedStatus = cached.map(problem => ({
+        ...problem,
+        solvedBy: solvedProblemIds.has(problem.id) ? [{ userId: req.user.id }] : [],
+      }));
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Problems fetched successfully',
+        problems: problemsWithSolvedStatus,
+        cached: true,
+      });
+    }
+
     const problems = await Problem.find().lean();
     
-    // Get solved problems for current user
     const solvedProblems = await ProblemSolved.find({ userId: req.user.id }).lean();
     const solvedProblemIds = new Set(solvedProblems.map(sp => sp.problemId.toString()));
     
-    // Add solved status to each problem
     const problemsWithSolvedStatus = problems.map(problem => ({
       ...problem,
       id: problem._id.toString(),
       solvedBy: solvedProblemIds.has(problem._id.toString()) ? [{ userId: req.user.id }] : [],
     }));
     
-    // Send success response with all problems
+    await cacheService.cacheProblems(problemsWithSolvedStatus, 600);
+    
     res.status(200).json({
       success: true,
       message: 'Problems fetched successfully',
       problems: problemsWithSolvedStatus,
     });
   } catch (error) {
-    // Log error to console for debugging
-    console.error('Error fetching problems:', error);
-    // Send error response to the client
+    logger.error('Error fetching problems:', error);
     res.status(500).json({ error: 'Failed to fetch problems' });
   }
 };
 
 
-// Function to get a single problem by its ID
 export const getProblemById = async (req, res) => {
-  // Extract problem ID from URL parameters
   const { id } = req.params;
 
   try {
-    // Find the specific problem by ID in database
+    const cached = await cacheService.getCachedProblem(id);
+    if (cached) {
+      return res.status(200).json({
+        success: true,
+        message: 'Problem fetched successfully',
+        problem: cached,
+        cached: true,
+      });
+    }
+
     const problem = await Problem.findById(id).lean();
     
-    // If problem doesn't exist, return error
     if (!problem) {
       return res.status(404).json({ error: 'Problem not found' });
     }
     
-    // Send success response with the problem details
+    const problemData = {
+      ...problem,
+      id: problem._id.toString(),
+    };
+    
+    await cacheService.cacheProblem(id, problemData, 3600);
+    
     res.status(200).json({
       success: true,
       message: 'Problem fetched successfully',
-      problem: {
-        ...problem,
-        id: problem._id.toString(),
-      },
+      problem: problemData,
     });
   } catch (error) {
-    // Log error to console for debugging
-    console.error('Error fetching problem:', error);
+    logger.error('Error fetching problem:', error);
     
-    // Handle CastError for invalid ObjectId
     if (error.name === 'CastError') {
       return res.status(400).json({ error: 'Invalid problem ID format' });
     }
     
-    // Send error response to the client
     res.status(500).json({ error: 'Failed to fetch problem' });
   }
 };

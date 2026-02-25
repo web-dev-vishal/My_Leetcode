@@ -20,12 +20,53 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: leetcode-redis
+    command: redis-server --requirepass redispass123 --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - leetcode-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispass123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: leetcode-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: rabbitmqpass123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - leetcode-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: leetcode-app
     environment:
+      NODE_ENV: production
       PORT: 8080
       MONGODB_URI: mongodb://admin:admin@db:27017/leetcode?authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redispass123
+      RABBITMQ_URL: amqp://admin:rabbitmqpass123@rabbitmq:5672
       JWT_SECRET: 33dc7f503c5d51075a75333a86bec8ad83038b7c5a957356b72ded207697315c
       RAPIDAPI_KEY: 8f8c4db865msh020ffd097deb5f0p1d129ajsne4ac3f4df319
       RAPIDAPI_HOST: judge0-ce.p.rapidapi.com
@@ -35,12 +76,45 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - leetcode-network
     restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: leetcode-worker
+    command: node src/workers/index.js
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://admin:admin@db:27017/leetcode?authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redispass123
+      RABBITMQ_URL: amqp://admin:rabbitmqpass123@rabbitmq:5672
+      RAPIDAPI_KEY: 8f8c4db865msh020ffd097deb5f0p1d129ajsne4ac3f4df319
+      RAPIDAPI_HOST: judge0-ce.p.rapidapi.com
+      JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - leetcode-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2
 
 networks:
   leetcode-network:
 
 volumes:
   mongodb_data:
+  redis_data:
+  rabbitmq_data:
