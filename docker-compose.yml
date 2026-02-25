@@ -62,7 +62,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8080
-      MONGODB_URI: mongodb://admin:admin@db:27017/leetcode?authSource=admin
+      MONGODB_URI: mongodb://localhost:27017/leetcode
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redispass123
@@ -95,7 +95,7 @@ services:
     command: node src/workers/index.js
     environment:
       NODE_ENV: production
-      MONGODB_URI: mongodb://admin:admin@db:27017/leetcode?authSource=admin
+      MONGODB_URI: mongodb://localhost:27017/leetcode
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redispass123

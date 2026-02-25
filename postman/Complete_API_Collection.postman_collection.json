@@ -234,10 +234,9 @@
       ]
     }
   ]
-}
-,
-    {
-      "name": "3. Code Execution",
+},
+  {
+    "name": "3. Code Execution",
       "item": [
         {
           "name": "Execute Code",
