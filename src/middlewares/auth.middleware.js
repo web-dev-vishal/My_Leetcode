@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { db } from "../lib/db.js";
+import { User } from "../models/index.js";
 
 export const authenticate = async (req, res, next) => {
   try {
@@ -18,25 +18,29 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized - Invalid Token" });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        image: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    });
+    const user = await User.findById(decoded.id).select('_id image name email role');
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    req.user = user;
+    // Convert _id to id for consistency with frontend
+    req.user = {
+      id: user._id.toString(),
+      image: user.image,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
     next();
   } catch (error) {
     console.error("Error in authenticate middleware:", error.message);
+    
+    // Handle CastError for invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+    
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -45,14 +49,7 @@ export const checkAdmin = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const user = await db.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        role: true,
-      },
-    });
+    const user = await User.findById(userId).select('role');
 
     if (!user || user.role !== "ADMIN") {
       return res
@@ -62,7 +59,13 @@ export const checkAdmin = async (req, res, next) => {
 
     next()
   } catch (error) {
-        console.error("Error in checkAdmin middleware:", error.message);
+    console.error("Error in checkAdmin middleware:", error.message);
+    
+    // Handle CastError for invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+    
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
