@@ -73,9 +73,10 @@ services:
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
-      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
+      OPENROUTER_MODEL: google/gemini-flash-1.5
       OPENROUTER_TIMEOUT: 30000
       APP_URL: http://localhost:8080
+      CORS_ORIGIN: "*"
     ports:
       - "8080:8080"
     depends_on:
@@ -91,7 +92,6 @@ services:
 
   worker:
     build: .
-    container_name: leetcode-worker
     command: node src/workers/index.js
     environment:
       NODE_ENV: production
@@ -105,7 +105,7 @@ services:
       JUDGE0_API_URL: https://judge0-ce.p.rapidapi.com
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
-      OPENROUTER_MODEL: anthropic/claude-3.5-sonnet
+      OPENROUTER_MODEL: google/gemini-flash-1.5
     depends_on:
       db:
         condition: service_healthy

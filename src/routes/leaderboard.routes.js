@@ -10,6 +10,7 @@ const router = express.Router();
 
 router.get('/', getLeaderboard);
 router.get('/rank', authenticate, getUserRank);
-router.get('/stats/:userId?', authenticate, getUserStats);
+router.get('/stats', authenticate, getUserStats);
+router.get('/stats/:userId', authenticate, getUserStats);
 
 export default router;
