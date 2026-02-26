@@ -20,6 +20,7 @@ import playListroutes from "./routes/playlist.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
+import publicApiRoutes from "./routes/publicApi.routes.js";
 import { rateLimiter } from "./lib/rateLimiter.js";
                                                                                                                                                                                                                                                                                                                                                                                        
 dotenv.config({ path: {debug: true} });
@@ -81,6 +82,7 @@ async function startServer() {
     app.use("/api/v1/leaderboard", leaderboardRoutes);
     app.use("/api/v1/health", healthRoutes);
     app.use("/api/v1/ai", aiRoutes);
+    app.use("/api/v1/public-apis", publicApiRoutes);
 
     app.use(errorHandler);
 

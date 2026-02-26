@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "Public API Integration",
+    "description": "Test endpoints for Public API Integration system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public-apis/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public-apis", "health"]
+        },
+        "description": "Check if Public API integration is operational"
+      },
+      "response": []
+    },
+    {
+      "name": "Get API Registry",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public-apis/registry",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public-apis", "registry"]
+        },
+        "description": "Get list of all configured APIs"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Weather by City",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public-apis/weather/current?city=London",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public-apis", "weather", "current"],
+          "query": [
+            {
+              "key": "city",
+              "value": "London",
+              "description": "City name"
+            },
+            {
+              "key": "country",
+              "value": "UK",
+              "description": "Country code (optional)",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Get current weather for a city"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Weather by Coordinates",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public-apis/weather/current?lat=51.5074&lon=-0.1278",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public-apis", "weather", "current"],
+          "query": [
+            {
+              "key": "lat",
+              "value": "51.5074",
+              "description": "Latitude"
+            },
+            {
+              "key": "lon",
+              "value": "-0.1278",
+              "description": "Longitude"
+            }
+          ]
+        },
+        "description": "Get current weather by coordinates (London)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Weather Forecast",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/public-apis/weather/forecast?lat=51.5074&lon=-0.1278&days=5",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "public-apis", "weather", "forecast"],
+          "query": [
+            {
+              "key": "lat",
+              "value": "51.5074",
+              "description": "Latitude"
+            },
+            {
+              "key": "lon",
+              "value": "-0.1278",
+              "description": "Longitude"
+            },
+            {
+              "key": "days",
+              "value": "5",
+              "description": "Number of days (optional, default 5)"
+            }
+          ]
+        },
+        "description": "Get weather forecast for coordinates"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
