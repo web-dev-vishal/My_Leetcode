@@ -117,9 +117,79 @@ docker-compose down
 - GET `/api/v1/leaderboard/rank` - Get user rank
 - GET `/api/v1/leaderboard/stats/:userId` - Get user statistics
 
+### API Explorer (New)
+- GET `/api/v1/public-apis/catalog` - List all APIs (optional `?category=`)
+- GET `/api/v1/public-apis/catalog/categories` - List categories
+- GET `/api/v1/public-apis/catalog/:apiName` - Get API details + endpoints
+- POST `/api/v1/public-apis/test/execute` - Execute single endpoint test
+- POST `/api/v1/public-apis/test/batch` - Batch test all endpoints for an API
+- POST `/api/v1/public-apis/test/custom` - Execute custom/freeform request
+- GET `/api/v1/public-apis/health` - API integration health
+
 ### Health (New)
 - GET `/api/v1/health` - Basic health check
 - GET `/api/v1/health/detailed` - Detailed system health
+
+## API Explorer
+
+The project includes a **reusable API Explorer** for browsing and testing 6 curated public REST APIs (no weather).
+
+### Curated APIs
+
+| API | Category | Auth | Endpoints | Base URL |
+|-----|----------|------|-----------|----------|
+| PoetryDB | Books | None | 3 | `https://poetrydb.org` |
+| Gutendex | Books | None | 3 | `https://gutendex.com` |
+| NASA APOD | Science | DEMO_KEY | 3 | `https://api.nasa.gov` |
+| Numbers API | Science | None | 3 | `http://numbersapi.com` |
+
+### Quick Test
+
+```bash
+
+# Execute endpoint test
+curl -X POST http://localhost:8080/api/v1/public-apis/test/execute \
+  -H "Content-Type: application/json" \
+  -d '{"apiName": "dog-ceo", "endpointIndex": 0}'
+
+# Batch test all endpoints
+curl -X POST http://localhost:8080/api/v1/public-apis/test/batch \
+  -H "Content-Type: application/json" \
+  -d '{"apiName": "poetrydb"}'
+
+# Custom request
+curl -X POST http://localhost:8080/api/v1/public-apis/test/custom \
+  -H "Content-Type: application/json" \
+  -d '{"method": "GET", "url": "https://catfact.ninja/fact"}'
+```
+
+### How to Add a New API
+
+1. Open `src/lib/publicApi/apiRegistry.js`
+2. Add a `registerAPI()` call in `_loadFreeAPIs()`:
+   ```js
+   this.registerAPI({
+     name: 'my-api',
+     displayName: 'My API',
+     category: 'animals', // or any valid category
+     baseURL: 'https://api.example.com',
+     auth: { type: 'none' },
+     timeout: 10000,
+     rateLimit: { maxRequests: 100, windowSeconds: 60 },
+     cache: { enabled: true, ttl: 300 },
+     retry: { enabled: true, maxAttempts: 3, backoffMs: 1000 },
+     health: { enabled: true, endpoint: '/ping', intervalSeconds: 300 },
+     metadata: { description: 'My API description', documentation: 'https://docs.example.com', version: '1.0' },
+     endpoints: [
+       { method: 'GET', path: '/data', description: 'Get data' },
+     ]
+   });
+   ```
+3. Restart the server — the new API appears in `/api/v1/public-apis/catalog`
+
+### Postman Collection
+
+Import `postman/explorer_collection.json` into Postman (14 requests with test scripts).
 
 ## WebSocket Events
 

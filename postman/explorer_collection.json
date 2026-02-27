@@ -1,0 +1,523 @@
+{
+    "info": {
+        "_postman_id": "api-explorer-collection-v1",
+        "name": "API Explorer — Public APIs Collection",
+        "description": "Curated collection of public REST API endpoints for the Leetcode project. Covers 6 APIs across 3 categories: Animals, Books, Science.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "description": "Backend base URL"
+        }
+    ],
+    "item": [
+        {
+            "name": "Catalog & Health",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "health"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Is healthy', () => pm.expect(pm.response.json().data.status).to.eql('healthy'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List All APIs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/catalog",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "catalog"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has APIs', () => pm.expect(pm.response.json().data.total).to.be.at.least(6));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/catalog/categories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "catalog",
+                                "categories"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has animals, books, science', () => {",
+                                    "  const cats = pm.response.json().data.categories;",
+                                    "  pm.expect(cats).to.include.members(['animals', 'books', 'science']);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Filter by Category — Animals",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/catalog?category=animals",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "catalog"
+                            ],
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "animals"
+                                }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Only animals', () => pm.expect(pm.response.json().data.total).to.eql(2));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get API Detail — Dog CEO",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/catalog/dog-ceo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "catalog",
+                                "dog-ceo"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Is Dog CEO', () => pm.expect(pm.response.json().data.name).to.eql('dog-ceo'));",
+                                    "pm.test('Has 3 endpoints', () => pm.expect(pm.response.json().data.endpoints.length).to.eql(3));"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Test Execution",
+            "item": [
+                {
+                    "name": "Execute — Dog CEO Random Image",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"apiName\": \"dog-ceo\", \"endpointIndex\": 0}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/test/execute",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "test",
+                                "execute"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Test passed', () => pm.expect(pm.response.json().test.passed).to.be.true);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Execute — Cat Facts",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"apiName\": \"cat-facts\", \"endpointIndex\": 0}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/test/execute",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "test",
+                                "execute"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Test passed', () => pm.expect(pm.response.json().test.passed).to.be.true);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Batch Test — PoetryDB",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"apiName\": \"poetrydb\"}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/test/batch",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "test",
+                                "batch"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has summary', () => pm.expect(pm.response.json().summary.total).to.eql(3));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Custom Request — Numbers API",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"method\": \"GET\", \"url\": \"http://numbersapi.com/42/trivia?json\"}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-apis/test/custom",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-apis",
+                                "test",
+                                "custom"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Got fact', () => pm.expect(pm.response.json().test.status).to.eql(200));"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Direct API Calls",
+            "item": [
+                {
+                    "name": "Dog CEO — Random Image",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://dog.ceo/api/breeds/image/random",
+                            "protocol": "https",
+                            "host": [
+                                "dog",
+                                "ceo"
+                            ],
+                            "path": [
+                                "api",
+                                "breeds",
+                                "image",
+                                "random"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has image URL', () => pm.expect(pm.response.json().message).to.include('https://'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PoetryDB — Random Poem",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://poetrydb.org/random",
+                            "protocol": "https",
+                            "host": [
+                                "poetrydb",
+                                "org"
+                            ],
+                            "path": [
+                                "random"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has poem', () => pm.expect(pm.response.json()[0]).to.have.property('title'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Gutendex — Search Books",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://gutendex.com/books?search=shakespeare",
+                            "protocol": "https",
+                            "host": [
+                                "gutendex",
+                                "com"
+                            ],
+                            "path": [
+                                "books"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "shakespeare"
+                                }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has results', () => pm.expect(pm.response.json().count).to.be.above(0));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "NASA APOD — Today",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY",
+                            "protocol": "https",
+                            "host": [
+                                "api",
+                                "nasa",
+                                "gov"
+                            ],
+                            "path": [
+                                "planetary",
+                                "apod"
+                            ],
+                            "query": [
+                                {
+                                    "key": "api_key",
+                                    "value": "DEMO_KEY"
+                                }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Has title', () => pm.expect(pm.response.json()).to.have.property('title'));"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Numbers API — Trivia 42",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://numbersapi.com/42/trivia?json",
+                            "protocol": "http",
+                            "host": [
+                                "numbersapi",
+                                "com"
+                            ],
+                            "path": [
+                                "42",
+                                "trivia"
+                            ],
+                            "query": [
+                                {
+                                    "key": "json",
+                                    "value": null
+                                }
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                                    "pm.test('Is trivia', () => pm.expect(pm.response.json().number).to.eql(42));"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
