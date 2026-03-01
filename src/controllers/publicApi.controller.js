@@ -1,9 +1,7 @@
 import publicApiService from '../services/publicApiService.js';
 import { logger } from '../lib/logger.js';
 
-// ─── Existing Weather Endpoints ────────────────────────────────
-
-// ─── API Explorer Endpoints (new) ──────────────────────────────
+// ─── API Explorer Endpoints ──────────────────────────────
 
 /**
  * Get list of available APIs (with optional category filter)

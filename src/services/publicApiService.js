@@ -1,5 +1,4 @@
 import apiRegistry from '../lib/publicApi/apiRegistry.js';
-import WeatherAPIClient from '../lib/publicApi/clients/weatherClient.js';
 import APICacheManager from '../lib/publicApi/cacheManager.js';
 import BaseAPIClient from '../lib/publicApi/baseApiClient.js';
 import axios from 'axios';
@@ -27,115 +26,14 @@ class PublicAPIService {
     }
 
     let client;
-    switch (apiName) {
-      case 'openweathermap':
-        client = new WeatherAPIClient(config);
-        break;
-      default:
-        // For free/generic APIs, use BaseAPIClient directly
-        client = new BaseAPIClient(config);
-        break;
-    }
+    // For free/generic APIs, use BaseAPIClient directly
+    client = new BaseAPIClient(config);
 
     this.clients.set(apiName, client);
     return client;
   }
 
-  // ─── Weather Methods (existing) ──────────────────────────────
-
-  /**
-   * Get weather data with caching
-   */
-  async getWeather(params) {
-    try {
-      const apiName = 'openweathermap';
-      const config = apiRegistry.getConfig(apiName);
-
-      if (!config) {
-        return {
-          success: false,
-          error: {
-            code: 'API_NOT_CONFIGURED',
-            message: 'Weather API is not configured. Please add WEATHER_API_KEY to .env file'
-          }
-        };
-      }
-
-      const endpoint = params.city ? 'weather-city' : 'weather-coords';
-      const cacheKey = this.cacheManager.generateKey(apiName, endpoint, params);
-
-      if (config.cache?.enabled) {
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-          logger.info('Returning cached weather data');
-          return { ...cached, metadata: { ...cached.metadata, cached: true } };
-        }
-      }
-
-      const client = this.getClient(apiName);
-      let response;
-
-      if (params.city) {
-        response = await client.getCurrentWeatherByCity(params.city, params.country);
-      } else if (params.lat && params.lon) {
-        response = await client.getCurrentWeather(params.lat, params.lon);
-      } else {
-        return {
-          success: false,
-          error: { code: 'INVALID_PARAMETERS', message: 'Either city or lat/lon coordinates are required' }
-        };
-      }
-
-      if (response.success && config.cache?.enabled) {
-        await this.cacheManager.set(cacheKey, response, config.cache.ttl);
-      }
-
-      return response;
-    } catch (error) {
-      logger.error('Error in getWeather:', error);
-      return { success: false, error: { code: 'SERVICE_ERROR', message: error.message } };
-    }
-  }
-
-  /**
-   * Get weather forecast with caching
-   */
-  async getForecast(params) {
-    try {
-      const apiName = 'openweathermap';
-      const config = apiRegistry.getConfig(apiName);
-
-      if (!config) {
-        return {
-          success: false,
-          error: { code: 'API_NOT_CONFIGURED', message: 'Weather API is not configured' }
-        };
-      }
-
-      const cacheKey = this.cacheManager.generateKey(apiName, 'forecast', params);
-
-      if (config.cache?.enabled) {
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-          return { ...cached, metadata: { ...cached.metadata, cached: true } };
-        }
-      }
-
-      const client = this.getClient(apiName);
-      const response = await client.getForecast(params.lat, params.lon, params.days);
-
-      if (response.success && config.cache?.enabled) {
-        await this.cacheManager.set(cacheKey, response, config.cache.ttl);
-      }
-
-      return response;
-    } catch (error) {
-      logger.error('Error in getForecast:', error);
-      return { success: false, error: { code: 'SERVICE_ERROR', message: error.message } };
-    }
-  }
-
-  // ─── API Explorer Methods (new) ──────────────────────────────
+  // ─── API Explorer Methods ──────────────────────────────
 
   /**
    * Get list of available APIs with optional category filter

@@ -9,6 +9,12 @@ class APIRegistry {
   /**
    * Load API configurations from environment variables
    */
+  loadConfigurations() {
+    logger.info('Loading API configurations...');
+    this._loadFreeAPIs();
+    logger.info(`Loaded ${this.apis.size} API configurations`);
+  }
+
   /**
    * Load free public APIs that require no API keys.
    * These are always available without environment variables.
@@ -261,7 +267,7 @@ class APIRegistry {
     }
 
     // Validate category
-    const validCategories = ['weather', 'finance', 'news', 'sports', 'entertainment', 'utility', 'animals', 'books', 'science'];
+    const validCategories = ['animals', 'books', 'science', 'utility'];
     if (config.category && !validCategories.includes(config.category)) {
       errors.push(`category must be one of: ${validCategories.join(', ')}`);
     }
